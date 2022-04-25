@@ -1,0 +1,73 @@
+service: aws-lambda-crud-node
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  # Dando permisos dentro del proyecto para escribir en la tabla de la BD
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        -  #Copiamos aca el arn de la tabla.
+
+functions:
+  # Función hello.hello tipo get, a través del path "/"
+  hello:
+    handler: src/hello.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+  # Función addTask.addTask tipo post, a través del path "/tasks"
+  createTask:
+    handler: src/addTask.addTask
+    events:
+      - httpApi:
+          path: /tasks
+          method: post
+  # Función getTasks.getTasks tipo get, a través del path "/tasks"
+  getTasks:
+    handler: src/getTasks.getTasks
+    events:
+      - httpApi:
+          path: /tasks
+          method: get
+  # Función getTask.getTask tipo get, a través del path "/tasks/{id}"
+  getTask:
+    handler: src/getTask.getTask
+    events:
+      - httpApi:
+          path: /tasks/{id}
+          method: get
+  # Función updateTask.updateTask tipo put, a través del path "/tasks/{id} "
+  updateTask:
+    handler: src/updateTask.updateTask
+    events:
+      - httpApi:
+          path: /tasks/{id}
+          method: put
+  # Función deleteTask.deleteTask tipo put, a través del path "/tasks/{id} "
+  deleteTask:
+    handler: src/deleteTask.deleteTask
+    events:
+      - httpApi:
+          path: /tasks/{id}
+          method: delete
+
+resources:
+  # Configuración para la BD
+  Resources:
+    TaskTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TaskTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeYpe: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
